@@ -43,9 +43,6 @@ describe('TableProcessor', function () {
 			fillColor: function (i, node) {
 				return null;
 			},
-                        fillOpacity: function (i, node) {
-				return 1;
-			},
 			defaultBorder: true
 		};
 
@@ -157,8 +154,7 @@ describe('TableProcessor', function () {
 						paddingTop: function () { },
 						vLineWidth: function () { },
 						hLineWidth: function () { },
-						fillColor: function () { },
-						fillOpacity: function () { }
+						fillColor: function () { }
 					}
 				};
 			};

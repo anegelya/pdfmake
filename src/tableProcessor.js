@@ -2,7 +2,6 @@
 
 var ColumnCalculator = require('./columnCalculator');
 var isFunction = require('./helpers').isFunction;
-var isNumber = require('./helpers').isNumber;
 
 function TableProcessor(tableNode) {
 	this.tableNode = tableNode;
@@ -420,13 +419,9 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 
 			if (i < l - 1) {
 				var fillColor = body[rowIndex][colIndex].fillColor;
-				var fillOpacity = body[rowIndex][colIndex].fillOpacity;
 				if (!fillColor) {
 					fillColor = isFunction(this.layout.fillColor) ? this.layout.fillColor(rowIndex, this.tableNode, colIndex) : this.layout.fillColor;
 				}
-				if (!isNumber(fillOpacity)) {
-					fillOpacity = isFunction(this.layout.fillOpacity) ? this.layout.fillOpacity(rowIndex, this.tableNode, colIndex) : this.layout.fillOpacity;
-                                }
 				if (fillColor) {
 					var widthLeftBorder = leftCellBorder ? this.layout.vLineWidth(colIndex, this.tableNode) : 0;
 					var widthRightBorder;
@@ -449,8 +444,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 						w: x2f - x1f,
 						h: y2f - y1f,
 						lineWidth: 0,
-						color: fillColor,
-						fillOpacity: fillOpacity
+						color: fillColor
 					}, false, true, writer.context().backgroundLength[writer.context().page]);
 				}
 			}
