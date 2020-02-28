@@ -5,8 +5,10 @@ function buildColumnWidths(columns, availableWidth) {
 	let autoMin = 0;
 	let autoMax = 0;
 	let starColumns = [];
+	let starAutoColumns = [];
 	let starMaxMin = 0;
 	let starMaxMax = 0;
+	let starAutoColWidth = 0;
 	let fixedColumns = [];
 	let initial_availableWidth = availableWidth;
 
@@ -19,9 +21,16 @@ function buildColumnWidths(columns, availableWidth) {
 			starColumns.push(column);
 			starMaxMin = Math.max(starMaxMin, column._minWidth);
 			starMaxMax = Math.max(starMaxMax, column._maxWidth);
+		} else if (isStarAutoColumn(column)){
+			starAutoColumns.push(column);
 		} else {
 			fixedColumns.push(column);
 		}
+		starAutoColWidth += column._minWidth;
+	});
+
+	starAutoColumns.forEach(column => {
+		column._calcWidth = initial_availableWidth*(column._minWidth/starAutoColWidth);
 	});
 
 	fixedColumns.forEach(col => {
@@ -82,6 +91,10 @@ function buildColumnWidths(columns, availableWidth) {
 			});
 		}
 	}
+}
+
+function isStarAutoColumn(column){
+	return column.width === null || column.width === undefined || column.width === '%';
 }
 
 function isAutoColumn(column) {
