@@ -602,7 +602,20 @@ function renderVector(vector, pdfKitDoc) {
 
 function renderImage(image, x, y, pdfKitDoc) {
 	pdfKitDoc.opacity(image.opacity || 1);
-	pdfKitDoc.image(image.image, image.x, image.y, { width: image._width, height: image._height });
+	if (image.cover) {
+		pdfKitDoc.save()
+		pdfKitDoc.rect(image.x, image.y, image.cover[0], image.cover[1]).clip()
+		pdfKitDoc.image(image.image, image.x, image.y, {
+			cover: [image.cover[0], image.cover[1]],
+			width: image._width,
+			height: image._height,
+			align: 'center',
+			valign: 'center',
+		});
+		pdfKitDoc.restore()
+	} else {
+		pdfKitDoc.image(image.image, image.x, image.y, { width: image._width, height: image._height });
+	}
 	if (image.link) {
 		pdfKitDoc.link(image.x, image.y, image._width, image._height, image.link);
 	}
