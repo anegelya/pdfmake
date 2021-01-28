@@ -736,30 +736,48 @@ LayoutBuilder.prototype.buildNextLine = function (textNode) {
 	var textTools = new TextTools(null);
 
 	var isForceContinue = false;
-	while (textNode._inlines && textNode._inlines.length > 0 &&
-		(line.hasEnoughSpaceForInline(textNode._inlines[0], textNode._inlines.slice(1)) || isForceContinue)) {
+	while (textNode._inlines && textNode._inlines.length > 0 || isForceContinue) {
+		var inline = null;
 		var isHardWrap = false;
-		var inline = textNode._inlines.shift();
 		isForceContinue = false;
 
-		if (!inline.noWrap && inline.text.length > 1 && inline.width > line.getAvailableWidth()) {
+		if (line.hasEnoughSpaceForInline(textNode._inlines[0], textNode._inlines.slice(1))) {
+			inline = textNode._inlines.shift();
+
+			if (!inline.noWrap && inline.text.length > 1 && inline.width > line.getAvailableWidth()) {
+				var widthPerChar = inline.width / inline.text.length;
+				var maxChars = Math.floor(line.getAvailableWidth() / widthPerChar);
+				if (maxChars < 1) {
+					maxChars = 1;
+				}
+				if (maxChars < inline.text.length) {
+					var newInline = cloneInline(inline);
+
+					newInline.text = inline.text.substr(maxChars);
+					inline.text = inline.text.substr(0, maxChars);
+
+					newInline.width = textTools.widthOfString(newInline.text, newInline.font, newInline.fontSize, newInline.characterSpacing, newInline.fontFeatures);
+					inline.width = textTools.widthOfString(inline.text, inline.font, inline.fontSize, inline.characterSpacing, inline.fontFeatures);
+
+					textNode._inlines.unshift(newInline);
+					isHardWrap = true;
+				}
+			}
+		} else if (textNode.truncate) {
+			// Break last word in the line if truncated
+			inline = textNode._inlines.shift();
 			var widthPerChar = inline.width / inline.text.length;
 			var maxChars = Math.floor(line.getAvailableWidth() / widthPerChar);
 			if (maxChars < 1) {
 				maxChars = 1;
 			}
-			if (maxChars < inline.text.length) {
-				var newInline = cloneInline(inline);
 
-				newInline.text = inline.text.substr(maxChars);
-				inline.text = inline.text.substr(0, maxChars);
+			inline.text = inline.text.substr(0, maxChars);
+			inline.width = textTools.widthOfString(inline.text, inline.font, inline.fontSize, inline.characterSpacing, inline.fontFeatures);
 
-				newInline.width = textTools.widthOfString(newInline.text, newInline.font, newInline.fontSize, newInline.characterSpacing, newInline.fontFeatures);
-				inline.width = textTools.widthOfString(inline.text, inline.font, inline.fontSize, inline.characterSpacing, inline.fontFeatures);
-
-				textNode._inlines.unshift(newInline);
-				isHardWrap = true;
-			}
+			textNode._inlines = [];
+		} else {
+			break;
 		}
 
 		line.addInline(inline);
